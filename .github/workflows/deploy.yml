@@ -7,76 +7,76 @@ on:
 
 env:
   AWS_REGION: us-east-1
- # ROLE_TO_ASSUME: arn:aws:iam::144317819575:role/ROLE_1
   ECR_REPO: first
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        role-to-assume: ${{ secrets.LAMBDAROLE }}
-        aws-region: ${{ env.AWS_REGION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.LAMBDAROLE }}
+          aws-region: ${{ env.AWS_REGION }}
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build, tag, and push image to ECR
-      run: |
-        IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:latest"
-        docker build -t $IMAGE_URI ./app
-        docker push $IMAGE_URI
-        echo "image_uri=$IMAGE_URI" >> $GITHUB_ENV
+      - name: Build, tag, and push image to ECR
+        run: |
+          IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:latest"
+          docker build -t $IMAGE_URI ./app
+          docker push $IMAGE_URI
+          echo "image_uri=$IMAGE_URI" >> $GITHUB_ENV
 
   terraform-deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
 
     env:
       TF_VERSION: '1.11'
       AWS_REGION: us-east-1
       TF_LOG: DEBUG
-      TF_LOG_PATH: log.txt
+      TF_LOG_PATH: ./Use-case-06/log.txt
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Configure AWS credentials via OIDC
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        role-to-assume: ${{ secrets.LAMBDAROLE }}
-        aws-region: us-east-1
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.LAMBDAROLE }}
+          aws-region: ${{ env.AWS_REGION }}
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: ${{ env.TF_VERSION }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
 
-    - name: Terraform Init
-      run: terraform init
+      - name: Terraform Init
+        run: terraform init
 
-    - name: Terraform Validate
-      run: terraform validate
+      - name: Terraform Validate
+        run: terraform validate
 
-    - name: Terraform Plan
-      run: terraform plan
+      - name: Terraform Plan
+        run: terraform plan
 
-    - name: Terraform Apply
-      run: terraform apply -auto-approve
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
 
-    - name: Terraform Logs
-      uses: actions/upload-artifact@v4
-      with:
-        name: Terraform-logs
-        path: ./Use-case-06/log.txt
+      - name: Upload Terraform Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: Terraform-logs
+          path: ${{ env.TF_LOG_PATH }}
