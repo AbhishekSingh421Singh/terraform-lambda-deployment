@@ -9,7 +9,6 @@ module "lambda" {
     image_uri = "${var.account_id}.dkr.ecr.${var.region}.amazonaws.com/first:latest"
     account_id = var.account_id
     region     = var.region
-
 }
 
 module "apigateway" {
