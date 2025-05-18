@@ -7,8 +7,7 @@ module "lambda" {
   source        = "./modules/lambda"
   function_name = "Hello_World"
   image_uri     = "${var.account_id}.dkr.ecr.${var.region}.amazonaws.com/first:latest"
-  account_id    = var.account_id
-  region        = var.region
+  role_arn      = module.iam.role_arn
 }
 
 module "apigateway" {
