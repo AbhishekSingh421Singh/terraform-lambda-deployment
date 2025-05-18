@@ -5,7 +5,7 @@ module "iam" {
 
 module "lambda" {
     source = "./modules/lambda"
-    function_name = "Hello World!"
+    function_name = "Hello_World"
     image_uri  = "144317819575.dkr.ecr.us-east-1.amazonaws.com/first:latest"
     role_arn = module.iam.role_arn
 }

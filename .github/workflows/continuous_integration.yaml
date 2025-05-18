@@ -31,7 +31,4 @@ jobs:
         docker build -t $IMAGE_URI ./app
         docker push $IMAGE_URI
         echo "image_uri=$IMAGE_URI" >> $GITHUB_ENV
-    
-    - name: Output image URI
-      run: echo "Docker image pushed to: ${{ env.image_uri }}"
  
