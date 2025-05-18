@@ -1,4 +1,4 @@
-name: Build and Deploy Lambda
+name: Build and Deploy CI/CD
 
 on:
   workflow_dispatch:
