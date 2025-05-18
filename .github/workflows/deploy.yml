@@ -5,6 +5,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
+  ROLE_TO_ASSUME: arn:aws:iam::144317819575:role/ROLE_1
   ECR_REPO: first
 
 jobs:
@@ -18,7 +19,7 @@ jobs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
-        role-to-assume: ${{ secrets.ROLE }}
+        role-to-assume: ${{ env.ROLE_TO_ASSUME }}
         aws-region: ${{ env.AWS_REGION }}
 
     - name: Login to Amazon ECR
@@ -52,7 +53,7 @@ jobs:
     - name: Configure AWS credentials via OIDC
       uses: aws-actions/configure-aws-credentials@v2
       with:
-        role-to-assume: ${{ secrets.ROLE }}
+        role-to-assume: ${{ env.ROLE_TO_ASSUME }}
         aws-region: us-east-1
 
     - name: Setup Terraform
